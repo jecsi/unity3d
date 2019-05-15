@@ -1,0 +1,51 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class PlayerMovement : MonoBehaviour
+{
+	public float turnSpeed = 20f;
+	private Vector3 m_movement;
+	private Quaternion m_rotation=Quaternion.identity;
+	private Animator m_animator;
+	private Rigidbody m_rigidbody;
+	private AudioSource m_audioSource;
+
+	void Start()
+	{
+		m_animator = GetComponent<Animator> ();
+		m_rigidbody = GetComponent<Rigidbody> ();
+		m_audioSource = GetComponent<AudioSource> ();
+	}
+	void FixedUpdate()
+	{
+		float horizontal = Input.GetAxis ("Horizontal");
+		float vertical = Input.GetAxis ("Vertical");
+		m_movement.Set (horizontal, 0f, vertical);
+		m_movement.Normalize ();
+		bool hasHorizontalInput = !Mathf.Approximately (horizontal, 0f);
+		bool hasVerticalInput = !Mathf.Approximately (vertical, 0f);
+		bool isWalking = hasHorizontalInput || hasVerticalInput;
+		m_animator.SetBool ("IsWalking", isWalking);
+
+		Vector3 desireForward = Vector3.RotateTowards (transform.forward, m_movement, turnSpeed * Time.deltaTime, 0f);//角色的forward一直指向运动方向
+		m_rotation = Quaternion.LookRotation (desireForward);
+		if (isWalking)
+		{
+			if (!m_audioSource.isPlaying)
+				m_audioSource.Play ();
+		} 
+		else
+		{
+			m_audioSource.Stop ();
+		}
+
+	}
+
+
+	void OnAnimatorMove()
+	{
+		m_rigidbody.MovePosition (m_rigidbody.position + m_movement * m_animator.deltaPosition.magnitude);
+		m_rigidbody.MoveRotation (m_rotation);
+	}
+}

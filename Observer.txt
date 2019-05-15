@@ -1,0 +1,42 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Observer : MonoBehaviour
+{
+	public Transform player;
+	private bool m_IsplayerInrange;
+	public GameEnding gameEnding;
+	void Update()
+	{
+		if (m_IsplayerInrange)
+		{
+			Vector3 direction = player.position - transform.position + Vector3.up;
+			Ray ray = new Ray (transform.position, direction);
+			RaycastHit rayCastHit;
+			if (Physics.Raycast (ray,out rayCastHit))
+			{
+				if (rayCastHit.collider.transform == player)
+				{
+					gameEnding.CaughtPlayer ();
+				}
+				
+			}
+		}
+	}
+
+	void OnTriggerEnter(Collider other)
+	{
+		if (other.transform == player) 
+		{
+			m_IsplayerInrange = true;
+		}
+	}
+	void OnTriggerExit(Collider other)
+	{
+		if (other.transform == player) 
+		{
+			m_IsplayerInrange = false;
+		}
+	}
+}
